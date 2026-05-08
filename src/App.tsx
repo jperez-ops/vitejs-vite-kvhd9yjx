@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
 
+function getUrlKey() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("key");
+}
+
 const USERS = [
   { id: "u1", name: "JR Perez", role: "salesperson", pin: "1234" },
   { id: "u2", name: "Mike Thompson", role: "salesperson", pin: "2222" },
@@ -16,6 +21,7 @@ const INITIAL_KEYS = [
   { tagId: "TAG-006", stockNumber: "24T1006", year: 2024, make: "Toyota", model: "Highlander", color: "Blueprint", checkedOutBy: null, checkedOutAt: null },
   { tagId: "TAG-007", stockNumber: "24T1007", year: 2024, make: "Toyota", model: "Corolla", color: "Precious Metal", checkedOutBy: null, checkedOutAt: null },
   { tagId: "TAG-008", stockNumber: "24T1008", year: 2024, make: "Toyota", model: "Sequoia", color: "Wind Chill Pearl", checkedOutBy: null, checkedOutAt: null },
+  { tagId: "TAG-DOT", stockNumber: "TS511944A", year: 2025, make: "Toyota", model: "4Runner TRD Sport", color: "Midnight Black Metallic", checkedOutBy: null, checkedOutAt: null },
 ];
 
 const INITIAL_LOGS = [
@@ -226,6 +232,7 @@ export default function App() {
   const [keys, setKeys] = useState<KeyEntry[]>(INITIAL_KEYS);
   const [logs, setLogs] = useState<LogEntry[]>(INITIAL_LOGS);
   const [tab, setTab] = useState("scan");
+  const urlKey= getUrlKey();
   const [modal, setModal] = useState<{ key: KeyEntry; mode: string; action?: string } | null>(null);
   const [reassignModal, setReassignModal] = useState<KeyEntry | null>(null);
   const [search, setSearch] = useState("");
@@ -238,6 +245,13 @@ export default function App() {
     const t = setInterval(() => {}, 30000);
     return () => clearInterval(t);
   }, []);
+
+  useEffect(() => {
+    if (urlKey && currentUser) {
+      const key = keys.find(k => k.tagId === urlKey);
+      if (key) openKeyModal(key);
+    }
+  }, [currentUser]);
 
   function handlePin(digit: string) {
     if (digit === "clear") { setPin(""); return; }
